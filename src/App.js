@@ -1,24 +1,29 @@
-import logo from './logo.svg';
+import React from 'react';
 import './App.css';
+import FormPage from './components/FormPage';
+import LoginForm from './components/LoginForm';
+import EntriesList from './components/EntriesList';
+import ProtectedRoute from './components/ProtectedRoute';
+import { CssBaseline, Container } from '@mui/material';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Outlet,
+} from "react-router-dom";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Container component="main" maxWidth="lg" className="container">
+        <CssBaseline />
+        <Routes>
+          <Route path="/" element={<FormPage />} />
+          <Route path="/listaentradas" element={<EntriesList />} />
+          <Route path="/login" element={<LoginForm />} />
+        </Routes>
+      </Container>
+    </Router>
   );
 }
 
