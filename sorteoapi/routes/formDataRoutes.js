@@ -1,4 +1,5 @@
 const express = require('express');
+const multer = require('multer');
 const {
     createFormData,
     getFormData,
@@ -9,7 +10,10 @@ const {
 
 const router = express.Router();
 
-router.post('/formdata', createFormData);
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+router.post('/formdata', upload.single('factura'), createFormData);
 router.get('/formdata', getFormData);
 router.get('/formdata/:id', getSingleFormData);
 router.put('/formdata/:id', updateFormData);

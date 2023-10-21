@@ -1,5 +1,8 @@
 import React, { useState } from "react";
-import config from '../path-to-config';
+import config from '../config';
+import logoNavidad from '../images/logo-navidad.png';
+import authService from '../services/authService'; 
+import { darken } from '@mui/system';
 import {
   TextField,
   Button,
@@ -17,36 +20,22 @@ function LoginForm() {
     e.preventDefault();
 
     try {
-        const response = await fetch('${config.apiBaseUrl}/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(credentials)
-        });
+      const { token } = await authService.login(credentials);  
 
-        const data = await response.json();
-
-        if (response.ok) {
-            // Assuming your server responds with { token: "YOUR_JWT_TOKEN" }
-            localStorage.setItem('token', data.token);
-            localStorage.setItem("authenticated", "true");
-            window.location.replace("/listaentradas");
-        } else {
-            // Handle login errors here
-            console.error(data.message || 'Login failed');
-            // You might also want to show a user-friendly error message on the UI
-        }
-    } catch (error) {
-        console.error('Network or server error', error);
-        // Again, consider showing a user-friendly message for these kinds of errors
-    }
+      localStorage.setItem('token', token);
+      localStorage.setItem("authenticated", "true");
+      window.location.replace("/listaentradas");
+  } catch (error) {
+      console.error('Error:', error.message);
+      // You might also want to show a user-friendly error message on the UI
+  }
 };
 
   return (
     <Container component="main" maxWidth="xs">
+      <img src={logoNavidad} alt="Navidad Logo" style={{ width: '100%',height:'40%', marginBottom: '16px' }} /> 
       <Typography component="h1" variant="h5">
-        Login
+      Inicia Sesión
       </Typography>
       <form onSubmit={handleLogin}>
         <TextField
@@ -54,7 +43,7 @@ function LoginForm() {
           margin="normal"
           required
           fullWidth
-          label="Username"
+          label="Usuario"
           autoFocus
           onChange={e => setCredentials({ ...credentials, username: e.target.value })}
         />
@@ -63,7 +52,7 @@ function LoginForm() {
           margin="normal"
           required
           fullWidth
-          label="Password"
+          label="Contraseña"
           type="password"
           onChange={e => setCredentials({ ...credentials, password: e.target.value })}
         />
@@ -73,8 +62,9 @@ function LoginForm() {
           variant="contained"
           color="primary"
           style={{ marginTop: "16px" }}
+          sx={{ backgroundColor: '#e16c08', '&:hover': { backgroundColor: darken('#e16c08', 0.1) } }}
         >
-          Login
+          Iniciar Sesion
         </Button>
       </form>
     </Container>

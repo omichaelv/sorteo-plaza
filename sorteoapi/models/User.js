@@ -1,19 +1,15 @@
 const { Sequelize, DataTypes, Model } = require('sequelize');
-const sequelize = new Sequelize('database', 'username', 'password', {
-    host: 'localhost',
-    dialect: 'mysql'
-});
+const sequelize = require('../config/db');
 
 class User extends Model {}
 
 User.init({
-    // Define attributes here
     id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
     },
-    email: {
+    username: {
         type: DataTypes.STRING,
         unique: true,
         allowNull: false,
@@ -24,7 +20,9 @@ User.init({
     }
 }, {
     sequelize,
-    modelName: 'User'
+    modelName: 'User',
+    tableName: 'users',
+    timestamps: false
 });
 
 module.exports = User;

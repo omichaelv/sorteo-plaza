@@ -1,6 +1,12 @@
 import React, { useState } from "react";
-import { TextField, Button, Container, Typography, InputAdornment, IconButton } from "@mui/material";
+import { TextField, Button, Container, Typography, InputAdornment, IconButton, Autocomplete } from "@mui/material";
 import { PhotoCamera } from "@mui/icons-material";
+import HeaderComponent from './HeaderComponent';
+import { darken } from '@mui/system';
+import logoNavidad from '../images/logo-navidad.png';
+import footerChristmas from '../images/footer-christmas.jpg';
+import { createFormData } from '../services/formDataService';
+import tiendas from './storeList'; 
 
 function FormComponent() {
   const [formData, setFormData] = useState({
@@ -12,6 +18,9 @@ function FormComponent() {
     valorCompra: "",
     factura: null
   });
+
+
+
 
   const [errors, setErrors] = useState({});
   const validate = () => {
@@ -34,9 +43,19 @@ function FormComponent() {
     e.preventDefault();
 
     if (validate()) {
-        // TODO: Add API call here to send formData.
-        alert("Gracias por participar");
+      try {
+        const response = await createFormData(formData);
+
+        if (response && response.id) { 
+          alert("Gracias por participar");
+        } else {
+          alert("Hubo un problema al enviar los datos. Inténtalo de nuevo.");
+        }
+      } catch (error) {
+        console.error("Error sending form data:", error);
+        alert("Error al enviar el formulario. Por favor intente nuevamente más tarde.");
       }
+    }
 
    
   };
@@ -57,9 +76,11 @@ function FormComponent() {
 
   return (
     <Container component="main" maxWidth="xs">
-      <Typography component="h1" variant="h5">
-      Participa Ahora
+       <img src={logoNavidad} alt="Navidad Logo" style={{ width: '100%',height:'40%', marginBottom: '16px' }} /> 
+      <Typography component="h1" variant="h5" sx={{ fontWeight: 'bold' }}>
+      Formulario de Promoción
       </Typography>
+      <HeaderComponent />
       <form onSubmit={handleSubmit} noValidate>
         <TextField
           variant="outlined"
@@ -71,6 +92,7 @@ function FormComponent() {
           name="nombre"
           autoFocus
           onChange={handleInputChange}
+          sx={{ backgroundColor: '#f5f5f5' }}
           {...(errors.nombre && { error: true, helperText: errors.nombre })}
         />
         <TextField
@@ -82,19 +104,33 @@ function FormComponent() {
           label="Número de DNI"
           name="dni"
           onChange={handleInputChange}
+          sx={{ backgroundColor: '#f5f5f5' }}
           {...(errors.dni && { error: true, helperText: errors.dni })}
         />
-        <TextField
-          variant="outlined"
-          margin="normal"
-          required
-          fullWidth
-          id="tienda"
-          label="Tienda donde realizo la compra"
-          name="tienda"
-          onChange={handleInputChange}
-          {...(errors.tienda && { error: true, helperText: errors.tienda })}
-        />
+        <Autocomplete
+  id="tienda"
+  options={tiendas}
+  fullWidth
+  freeSolo
+  onChange={(event, newValue) => {
+    setFormData({
+      ...formData,
+      tienda: newValue
+    });
+  }}
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      variant="outlined"
+      margin="normal"
+      required
+      label="Tienda donde realizo la compra"
+      name="tienda"
+      sx={{ backgroundColor: '#f5f5f5' }}
+      {...(errors.tienda && { error: true, helperText: errors.tienda })}
+    />
+  )}
+/>
         <TextField
           variant="outlined"
           margin="normal"
@@ -104,6 +140,7 @@ function FormComponent() {
           label="Celular - Whatsapp"
           name="celular"
           onChange={handleInputChange}
+          sx={{ backgroundColor: '#f5f5f5' }}
           {...(errors.celular && { error: true, helperText: errors.celular })}
         />
         <TextField
@@ -115,6 +152,7 @@ function FormComponent() {
           label="Correo"
           name="correo"
           onChange={handleInputChange}
+          sx={{ backgroundColor: '#f5f5f5' }}
           {...(errors.correo && { error: true, helperText: errors.correo })}
         />
         <TextField
@@ -126,11 +164,13 @@ function FormComponent() {
           label="Valor de compra realizada"
           name="valorCompra"
           onChange={handleInputChange}
+          sx={{ backgroundColor: '#f5f5f5' }}
           {...(errors.valorCompra && { error: true, helperText: errors.valorCompra })}
         />
         <Button
           variant="contained"
           component="label"
+          sx={{ backgroundColor: '#f29410', '&:hover': { backgroundColor: darken('#f29410', 0.1) } }}
           startIcon={<PhotoCamera />}
         >
           Subir Factura
@@ -150,11 +190,13 @@ function FormComponent() {
           variant="contained"
           color="primary"
           className="button"
-          style={{ marginTop: "16px" }}
+          sx={{ backgroundColor: '#e16c08', '&:hover': { backgroundColor: darken('#e16c08', 0.1) } }}
+          style={{ marginTop: "16px", width:"80%" }}
         >
           Enviar
         </Button>
       </form>
+      <img src={footerChristmas} alt="Christmas Footer" style={{ width: '100%', marginTop: '16px' }} /> {/* Adjust width as necessary */}
     </Container>
   );
 }

@@ -1,13 +1,10 @@
+const sequelize = require('../config/db');
 const { Sequelize, DataTypes, Model } = require('sequelize');
-const sequelize = new Sequelize('database', 'username', 'password', {
-    host: 'localhost',
-    dialect: 'mysql'
-});
+
 
 class FormData extends Model {}
 
 FormData.init({
-    // Define attributes here
     id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
@@ -37,13 +34,13 @@ FormData.init({
         type: DataTypes.STRING, 
         allowNull: false,
     },
-    facturaImage: {
-        type: DataTypes.STRING, 
+    factura: {
+        type: DataTypes.TEXT('long'),
         allowNull: false,
     },
 }, {
     sequelize,
-    modelName: 'FormData'
+    modelName: 'FormData',
 });
 
 module.exports = FormData;
