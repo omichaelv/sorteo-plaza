@@ -5,7 +5,7 @@ const config = {
         apiBaseUrl: 'http://localhost:5000'
     },
     production: {
-        apiBaseUrl: 'https://your-production-server.com'
+        apiBaseUrl: '/api'
     },
     // ... You can add more environments if needed
 };

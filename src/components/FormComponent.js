@@ -3,13 +3,16 @@ import { TextField, Button, Container, Typography, InputAdornment, IconButton, A
 import { PhotoCamera } from "@mui/icons-material";
 import HeaderComponent from './HeaderComponent';
 import { darken } from '@mui/system';
-import logoNavidad from '../images/logo-navidad.png';
+import logoNavidad from '../images/logo-navidad.jpg';
 import footerChristmas from '../images/footer-christmas.jpg';
 import { createFormData } from '../services/formDataService';
 import tiendas from './storeList'; 
+import { Search } from '@mui/icons-material';
+import ThankYouComponent from './ThankYouComponent';
 
 function FormComponent() {
-  const [formData, setFormData] = useState({
+
+  const initialFormData = {
     nombre: "",
     dni: "",
     tienda: "",
@@ -17,10 +20,13 @@ function FormComponent() {
     correo: "",
     valorCompra: "",
     factura: null
-  });
+};
+
+  const [formData, setFormData] = useState(initialFormData);
 
 
-
+  const sortedTiendas = tiendas.sort((a, b) => a.localeCompare(b));
+  const [formSubmitted, setFormSubmitted] = useState(false);
 
   const [errors, setErrors] = useState({});
   const validate = () => {
@@ -31,9 +37,14 @@ function FormComponent() {
     tempErrors.dni = formData.dni ? "" : "El DNI es obligatorio.";
     tempErrors.tienda = formData.tienda ? "" : "La tienda es obligatoria.";
     tempErrors.celular = formData.celular ? "" : "El número de celular es obligatorio.";
-    tempErrors.correo = formData.correo && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(formData.correo) ? "" : "Se requiere un correo electrónico válido.";
     tempErrors.valorCompra = formData.valorCompra ? "" : "El valor de compra es obligatorio.";
     tempErrors.factura = formData.factura ? "" : "La imagen de la factura es obligatoria.";
+
+    if (!sortedTiendas.includes(formData.tienda)) {
+      tempErrors.tienda = "Por favor seleccione una tienda válida de la lista.";
+    } else {
+      tempErrors.tienda = formData.tienda ? "" : "La tienda es obligatoria.";
+    }
 
     setErrors(tempErrors);
     return Object.values(tempErrors).every(x => x === "");
@@ -47,12 +58,12 @@ function FormComponent() {
         const response = await createFormData(formData);
 
         if (response && response.id) { 
-          alert("Gracias por participar");
+          setFormData(initialFormData);
+          setFormSubmitted(true);
         } else {
           alert("Hubo un problema al enviar los datos. Inténtalo de nuevo.");
         }
       } catch (error) {
-        console.error("Error sending form data:", error);
         alert("Error al enviar el formulario. Por favor intente nuevamente más tarde.");
       }
     }
@@ -61,10 +72,53 @@ function FormComponent() {
   };
 
   const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    if (e.target.name === "nombre") {
+      const nameRegex = /^[a-zA-Z\s]*$/;
+  
+      if (nameRegex.test(e.target.value)) {
+        setFormData({
+          ...formData,
+          [e.target.name]: e.target.value
+        });
+      }
+    }else if(e.target.name === "dni") {
+      let val = e.target.value.replace(/[^0-9]/g, "").substring(0, 13);
+  
+      if (val.length > 8) {
+        val = `${val.slice(0, 4)}-${val.slice(4, 8)}-${val.slice(8)}`;
+      } else if (val.length > 4) {
+        val = `${val.slice(0, 4)}-${val.slice(4)}`;
+      }
+  
+      setFormData({
+        ...formData,
+        [e.target.name]: val
+      });
+    } else if(e.target.name === "celular"){
+      let val = e.target.value.replace(/[^0-9]/g, "").substring(0, 8);
+  
+      if (val.length > 4) {
+        val = `${val.slice(0, 4)}-${val.slice(4)}`;
+      }
+      setFormData({
+        ...formData,
+        [e.target.name]: val
+      });
+    } else if (e.target.name === "valorCompra") {
+      const valorCompraRegex = /^\d+(\.\d{0,2})?$/;
+  
+      if (valorCompraRegex.test(e.target.value) || e.target.value === "" || e.target.value.endsWith(".")) {
+        setFormData({
+          ...formData,
+          [e.target.name]: e.target.value
+        });
+      }
+    } else {
+      setFormData({
+        ...formData,
+        [e.target.name]: e.target.value
+      });
+    }
   };
 
   const handleFileChange = (e) => {
@@ -74,9 +128,15 @@ function FormComponent() {
     });
   };
 
+  if (formSubmitted) {
+    return <ThankYouComponent returnToForm={() => {
+      setFormSubmitted(false);
+      setFormData(initialFormData); // reset the form data
+    }} />;
+  }
   return (
     <Container component="main" maxWidth="xs">
-       <img src={logoNavidad} alt="Navidad Logo" style={{ width: '100%',height:'40%', marginBottom: '16px' }} /> 
+       <img src={logoNavidad} alt="Navidad Logo" style={{ width: '80%',height:'40%', marginBottom: '16px' }} /> 
       <Typography component="h1" variant="h5" sx={{ fontWeight: 'bold' }}>
       Formulario de Promoción
       </Typography>
@@ -92,6 +152,7 @@ function FormComponent() {
           name="nombre"
           autoFocus
           onChange={handleInputChange}
+          value={formData.nombre} 
           sx={{ backgroundColor: '#f5f5f5' }}
           {...(errors.nombre && { error: true, helperText: errors.nombre })}
         />
@@ -104,7 +165,11 @@ function FormComponent() {
           label="Número de DNI"
           name="dni"
           onChange={handleInputChange}
+          value={formData.dni} 
           sx={{ backgroundColor: '#f5f5f5' }}
+          inputProps={{
+            maxLength: 15,
+          }}    
           {...(errors.dni && { error: true, helperText: errors.dni })}
         />
         <Autocomplete
@@ -127,6 +192,17 @@ function FormComponent() {
       label="Tienda donde realizo la compra"
       name="tienda"
       sx={{ backgroundColor: '#f5f5f5' }}
+      InputProps={{
+        ...params.InputProps, // Spread provided InputProps. This is important!
+        startAdornment: (
+          <>
+            <InputAdornment position="start">
+              <Search />
+            </InputAdornment>
+            {params.InputProps.startAdornment}
+          </>
+        )
+      }}
       {...(errors.tienda && { error: true, helperText: errors.tienda })}
     />
   )}
@@ -140,20 +216,12 @@ function FormComponent() {
           label="Celular - Whatsapp"
           name="celular"
           onChange={handleInputChange}
+          value={formData.celular} 
           sx={{ backgroundColor: '#f5f5f5' }}
+          inputProps={{
+            maxLength: 9,
+          }}  
           {...(errors.celular && { error: true, helperText: errors.celular })}
-        />
-        <TextField
-          variant="outlined"
-          margin="normal"
-          required
-          fullWidth
-          id="correo"
-          label="Correo"
-          name="correo"
-          onChange={handleInputChange}
-          sx={{ backgroundColor: '#f5f5f5' }}
-          {...(errors.correo && { error: true, helperText: errors.correo })}
         />
         <TextField
           variant="outlined"
@@ -164,6 +232,7 @@ function FormComponent() {
           label="Valor de compra realizada"
           name="valorCompra"
           onChange={handleInputChange}
+          value={formData.valorCompra} 
           sx={{ backgroundColor: '#f5f5f5' }}
           {...(errors.valorCompra && { error: true, helperText: errors.valorCompra })}
         />

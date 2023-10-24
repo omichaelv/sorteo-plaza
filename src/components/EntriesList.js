@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import useAuth from '../hooks/useAuth';
 import { getAllFormData } from '../services/formDataService'; // Import the service function
 import {
@@ -6,11 +6,14 @@ import {
   Paper, Typography, TablePagination, TextField, InputAdornment, Modal
 } from '@mui/material';
 import { Search } from '@mui/icons-material';
+import logoNavidad from '../images/logo-navidad.jpg';
+import PanZoom from 'react-easy-panzoom';
+
 
 function EntriesList() {
   // Call our custom authentication hook
   useAuth();
-
+  const panZoomRef = useRef(null);
   const [entries, setEntries] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredEntries, setFilteredEntries] = useState([]);
@@ -19,10 +22,13 @@ function EntriesList() {
 
   useEffect(() => {
     // Fetch the data
-    console.log('we in');
     getAllFormData().then(data => {
-      setEntries(data);
-      setFilteredEntries(data);
+      if (Array.isArray(data)) {
+        setEntries(data);
+        setFilteredEntries(data);
+      } else {
+        console.error('Received data is not an array:', data);
+      }
     });
   }, []);
 
@@ -54,10 +60,17 @@ function EntriesList() {
     setIsModalOpen(false);
   };
 
-  function getMimeType(base64String) {
-    if (!base64String) return 'unknown'; // if the string is null, undefined or empty, return 'unknown'
+  function formatLempiras(value) {
+    return new Intl.NumberFormat('es-HN', {
+        style: 'currency',
+        currency: 'HNL',
+    }).format(value);
+}
 
-    const header = base64String.substring(0, 15); // We only need the start of the string
+  function getMimeType(base64String) {
+    if (!base64String) return 'unknown'; 
+
+    const header = base64String.substring(0, 15); 
   
     if (header.includes('iVBOR')) return 'image/png';
     if (header.includes('/9j/')) return 'image/jpeg';
@@ -65,7 +78,7 @@ function EntriesList() {
     if (header.includes('UklGR')) return 'image/webp';
     if (header.includes('Qk0=')) return 'image/bmp';
   
-    return 'unknown'; // Or default to a type, like 'image/jpeg'
+    return 'unknown'; 
   }
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -73,7 +86,8 @@ function EntriesList() {
 
   return (
     <div>
-      <Typography variant="h5">Lista de Entradas</Typography>
+      <img src={logoNavidad} alt="Navidad Logo" style={{ width: '30%',height:'40%', marginBottom: '16px' }} /> 
+      <Typography variant="h5">Lista de participantes de nuestra promoción, “En esta navidad, reviví momentos, plaza miraflores”</Typography>
 
       <TextField
         variant="outlined"
@@ -95,11 +109,11 @@ function EntriesList() {
         <Table>
           <TableHead>
             <TableRow>
+            <TableCell>Numero</TableCell>
               <TableCell>Nombre</TableCell>
               <TableCell>DNI</TableCell>
               <TableCell>Tienda</TableCell>
               <TableCell>Celular</TableCell>
-              <TableCell>Correo</TableCell>
               <TableCell>Valor de Compra</TableCell>
               <TableCell>Imagen de Factura</TableCell>
             </TableRow>
@@ -107,12 +121,12 @@ function EntriesList() {
           <TableBody>
             {filteredEntries.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((entry) => (
               <TableRow key={entry.id}>
+                <TableCell>{entry.id}</TableCell>
                 <TableCell>{entry.nombre}</TableCell>
                 <TableCell>{entry.dni}</TableCell>
                 <TableCell>{entry.tienda}</TableCell>
                 <TableCell>{entry.celular}</TableCell>
-                <TableCell>{entry.correo}</TableCell>
-                <TableCell>{entry.valorCompra}</TableCell>
+                <TableCell>{formatLempiras(entry.valorCompra)}</TableCell>
                 <TableCell>
                   <button onClick={() => openImageModal(entry.factura)}>Ver Imagen</button>
                 </TableCell>
@@ -121,7 +135,7 @@ function EntriesList() {
           </TableBody>
         </Table>
         <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
+          rowsPerPageOptions={[50, 100, 150, 200, 250, 300]}
           component="div"
           count={filteredEntries.length}
           rowsPerPage={rowsPerPage}
@@ -131,16 +145,30 @@ function EntriesList() {
         />
       </TableContainer>
       <Modal
-        open={isModalOpen}
-        onClose={closeImageModal}
-        aria-labelledby="simple-modal-title"
-        aria-describedby="simple-modal-description"
-      >
-        <div style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)', position: 'absolute', width: '80%', backgroundColor: 'white', padding: '20px' }}>
-        {currentImage && <img src={`data:${getMimeType(currentImage)};base64,${currentImage}`} alt="Factura" style={{ width: '100%' }} />}
-        <button onClick={closeImageModal} style={{ marginTop: '20px' }}>Close</button>
+    open={isModalOpen}
+    onClose={closeImageModal}
+    aria-labelledby="simple-modal-title"
+    aria-describedby="simple-modal-description"
+>
+    <div style={{
+        top: '50%', left: '50%', transform: 'translate(-50%, -50%)', 
+        position: 'absolute', width: '80%', backgroundColor: 'white', 
+        padding: '20px', overflow: 'hidden'
+    }}>
+        <PanZoom>
+            {currentImage && 
+                <img 
+                    src={`data:${getMimeType(currentImage)};base64,${currentImage}`} 
+                    alt="Factura" 
+                    style={{ width: '100%', cursor: 'grab' }} 
+                />
+            }
+        </PanZoom>
+        <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between' }}>
+            <button onClick={closeImageModal}>Cerrar</button>
         </div>
-      </Modal>
+    </div>
+</Modal>
     </div>
   );
 }

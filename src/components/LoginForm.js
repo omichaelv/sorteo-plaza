@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import config from '../config';
-import logoNavidad from '../images/logo-navidad.png';
+import logoNavidad from '../images/logo-navidad.jpg';
 import authService from '../services/authService'; 
 import { darken } from '@mui/system';
 import {
