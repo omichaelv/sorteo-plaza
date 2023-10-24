@@ -4,7 +4,7 @@ import { PhotoCamera } from "@mui/icons-material";
 import HeaderComponent from './HeaderComponent';
 import { darken } from '@mui/system';
 import logoNavidad from '../images/logo-navidad.jpg';
-import footerChristmas from '../images/footer-christmas.jpg';
+
 import { createFormData } from '../services/formDataService';
 import tiendas from './storeList'; 
 import { Search } from '@mui/icons-material';
@@ -40,6 +40,13 @@ function FormComponent() {
     tempErrors.valorCompra = formData.valorCompra ? "" : "El valor de compra es obligatorio.";
     tempErrors.factura = formData.factura ? "" : "La imagen de la factura es obligatoria.";
 
+    if(parseFloat(formData.valorCompra) < 300.00){
+      tempErrors.valorCompra = tempErrors.valorCompra+ "El valor de la compra debe ser de L300.00 minimo." 
+    }
+    const count = (formData.valorCompra.match(/\./g) || []).length;
+    if(count > 1){
+      tempErrors.valorCompra = tempErrors.valorCompra+ "El valor de compra no es un numero valido." 
+    }
     if (!sortedTiendas.includes(formData.tienda)) {
       tempErrors.tienda = "Por favor seleccione una tienda válida de la lista.";
     } else {
@@ -136,10 +143,8 @@ function FormComponent() {
   }
   return (
     <Container component="main" maxWidth="xs">
-       <img src={logoNavidad} alt="Navidad Logo" style={{ width: '80%',height:'40%', marginBottom: '16px' }} /> 
-      <Typography component="h1" variant="h5" sx={{ fontWeight: 'bold' }}>
-      Formulario de Promoción
-      </Typography>
+       <img src={logoNavidad} alt="Navidad Logo" style={{ width: '75%',height:'40%', marginBottom: '16px' }} /> 
+      
       <HeaderComponent />
       <form onSubmit={handleSubmit} noValidate>
         <TextField
@@ -265,7 +270,7 @@ function FormComponent() {
           Enviar
         </Button>
       </form>
-      <img src={footerChristmas} alt="Christmas Footer" style={{ width: '100%', marginTop: '16px' }} /> {/* Adjust width as necessary */}
+      
     </Container>
   );
 }

@@ -18,7 +18,7 @@ function EntriesList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredEntries, setFilteredEntries] = useState([]);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
 
   useEffect(() => {
     // Fetch the data
@@ -46,7 +46,8 @@ function EntriesList() {
   };
 
   const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(+event.target.value);
+    const value = event.target.value;
+    setRowsPerPage(value === "Todos" ? filteredEntries.length : parseInt(value, 10));
     setPage(0);
   };
 
@@ -121,12 +122,12 @@ function EntriesList() {
           <TableBody>
             {filteredEntries.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((entry) => (
               <TableRow key={entry.id}>
-                <TableCell>{entry.id}</TableCell>
-                <TableCell>{entry.nombre}</TableCell>
-                <TableCell>{entry.dni}</TableCell>
-                <TableCell>{entry.tienda}</TableCell>
-                <TableCell>{entry.celular}</TableCell>
-                <TableCell>{formatLempiras(entry.valorCompra)}</TableCell>
+                <TableCell style={{ whiteSpace: 'nowrap' }}>{entry.id}</TableCell>
+<TableCell style={{ whiteSpace: 'nowrap' }}>{entry.nombre}</TableCell>
+<TableCell style={{ whiteSpace: 'nowrap' }}>{entry.dni}</TableCell>
+<TableCell style={{ whiteSpace: 'nowrap' }}>{entry.tienda}</TableCell>
+<TableCell style={{ whiteSpace: 'nowrap' }}>{entry.celular}</TableCell>
+<TableCell style={{ whiteSpace: 'nowrap' }}>{formatLempiras(entry.valorCompra)}</TableCell>
                 <TableCell>
                   <button onClick={() => openImageModal(entry.factura)}>Ver Imagen</button>
                 </TableCell>
@@ -135,13 +136,14 @@ function EntriesList() {
           </TableBody>
         </Table>
         <TablePagination
-          rowsPerPageOptions={[50, 100, 150, 200, 250, 300]}
+          rowsPerPageOptions={[25, 50, 100, 150, 200, 250, 300, 500, "Todos"]}
           component="div"
           count={filteredEntries.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
+          labelRowsPerPage="Registros por pagina"
         />
       </TableContainer>
       <Modal
