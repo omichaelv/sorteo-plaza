@@ -6,11 +6,12 @@ const sequelize = require('./config/db');
 const formDataRoutes = require('./routes/formDataRoutes');
 const authRoutes = require('./routes/authRoutes');
 const bcrypt = require('bcrypt'); 
-const User = require('./models/User'); 
+const User = require('./models/User');
 
 const app = express();
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 app.use(cors());
 
 
