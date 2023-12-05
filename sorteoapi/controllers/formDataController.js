@@ -30,7 +30,9 @@ exports.createFormData = async (req, res) => {
 
 exports.getFormData = async (req, res) => {
     try {
-        const data = await FormData.findAll();
+        const data = await FormData.findAll({
+            attributes: { exclude: ['factura'] } 
+        });
         res.status(200).json(data);
     } catch (error) {
         res.status(500).json({ message: "Error: " + error.message });
@@ -41,12 +43,15 @@ exports.getSingleFormData = async (req, res) => {
     try {
         const data = await FormData.findByPk(req.params.id);
         if (data) {
-            res.status(200).json(data);
+            // Send a success response with status and data
+            res.status(200).json({ status: 200, data });
         } else {
-            res.status(404).json({ message: "Entry not found" });
+            // Send a not found response with status and message
+            res.status(404).json({ status: "error", message: "Entry not found" });
         }
     } catch (error) {
-        res.status(500).json({ message: "Error: " + error.message });
+        // Send an error response with status and error message
+        res.status(500).json({ status: "error", message: "Error: " + error.message });
     }
 };
 

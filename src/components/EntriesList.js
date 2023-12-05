@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import useAuth from '../hooks/useAuth';
-import { getAllFormData } from '../services/formDataService'; // Import the service function
+import { getAllFormData, getSingleFormData } from '../services/formDataService'; // Import the service functions
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Paper, Typography, TablePagination, TextField, InputAdornment, Modal
@@ -8,7 +8,6 @@ import {
 import { Search } from '@mui/icons-material';
 import logoNavidad from '../images/logo-navidad.jpg';
 import PanZoom from 'react-easy-panzoom';
-
 
 function EntriesList() {
   // Call our custom authentication hook
@@ -66,7 +65,7 @@ function EntriesList() {
         style: 'currency',
         currency: 'HNL',
     }).format(value);
-}
+  }
 
   function getMimeType(base64String) {
     if (!base64String) return 'unknown'; 
@@ -84,6 +83,19 @@ function EntriesList() {
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentImage, setCurrentImage] = useState(null);
+
+  const openFacturaImage = async (entryId) => {
+    try {
+      const response = await getSingleFormData(entryId);
+      if (response.status === 200) {
+        openImageModal(response.data.factura);
+      } else {
+        console.error('Failed to fetch factura image:', response.data.message);
+      }
+    } catch (error) {
+      console.error('Error fetching factura image:', error.message);
+    }
+  };
 
   return (
     <div>
@@ -123,13 +135,13 @@ function EntriesList() {
             {filteredEntries.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((entry) => (
               <TableRow key={entry.id}>
                 <TableCell style={{ whiteSpace: 'nowrap' }}>{entry.id}</TableCell>
-<TableCell style={{ whiteSpace: 'nowrap' }}>{entry.nombre}</TableCell>
-<TableCell style={{ whiteSpace: 'nowrap' }}>{entry.dni}</TableCell>
-<TableCell style={{ whiteSpace: 'nowrap' }}>{entry.tienda}</TableCell>
-<TableCell style={{ whiteSpace: 'nowrap' }}>{entry.celular}</TableCell>
-<TableCell style={{ whiteSpace: 'nowrap' }}>{formatLempiras(entry.valorCompra)}</TableCell>
+                <TableCell style={{ whiteSpace: 'nowrap' }}>{entry.nombre}</TableCell>
+                <TableCell style={{ whiteSpace: 'nowrap' }}>{entry.dni}</TableCell>
+                <TableCell style={{ whiteSpace: 'nowrap' }}>{entry.tienda}</TableCell>
+                <TableCell style={{ whiteSpace: 'nowrap' }}>{entry.celular}</TableCell>
+                <TableCell style={{ whiteSpace: 'nowrap' }}>{formatLempiras(entry.valorCompra)}</TableCell>
                 <TableCell>
-                  <button onClick={() => openImageModal(entry.factura)}>Ver Imagen</button>
+                  <button onClick={() => openFacturaImage(entry.id)}>Ver Imagen</button>
                 </TableCell>
               </TableRow>
             ))}
