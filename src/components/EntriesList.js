@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import useAuth from '../hooks/useAuth';
-import { getAllFormData, getSingleFormData } from '../services/formDataService'; // Import the service functions
+import { getAllFormData, getSingleFormData, deleteFormData } from '../services/formDataService'; // Import the service functions
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, Typography, TablePagination, TextField, InputAdornment, Modal
+  Paper, Typography, TablePagination, TextField, InputAdornment, Modal,Button, Box
 } from '@mui/material';
 import { Search } from '@mui/icons-material';
 import logoNavidad from '../images/logo-navidad.jpg';
@@ -97,26 +97,87 @@ function EntriesList() {
     }
   };
 
+  const [isModalBorrarOpen, setIsModalBorrarOpen] = useState(false);
+  const [idBorrar, setidBorrar] = useState("");
+
+  const modalBorrarRegistro = async (entryId) => {
+    try {
+      setidBorrar(entryId);
+      setIsModalBorrarOpen(true);
+    } catch (error) {
+      
+    }
+  };
+
+  const borrarRegistro = async () => {
+    try {
+      const response = await deleteFormData(idBorrar);
+      if (response.message === "Entry deleted successfully") {
+        alert("Registro Borrado Correctamente");
+        setIsModalBorrarOpen(false);
+        getAllFormData().then(data => {
+          if (Array.isArray(data)) {
+            setEntries(data);
+            setFilteredEntries(data);
+          } else {
+            console.error('Received data is not an array:', data);
+          }
+        });
+      } else {
+        console.error('Failed to delete id:', response.data.message);
+      }
+    } catch (error) {
+      console.error('Failed to delete id:', error.message);
+    }
+  };
+
+  
+  const [isWinnerModalOpen, setIsWinnerModalOpen] = useState(false);
+  const [winner, setWinner] = useState(null);
+
+  const pickWinner = () => {
+    if (entries.length === 0) {
+      alert("No hay registros para seleccionar un ganador.");
+      return;
+    }
+    const randomIndex = Math.floor(Math.random() * entries.length);
+    setWinner(entries[randomIndex]);
+    setIsWinnerModalOpen(true);
+  };
+
   return (
     <div>
       <img src={logoNavidad} alt="Navidad Logo" style={{ width: '30%',height:'40%', marginBottom: '16px' }} /> 
       <Typography variant="h5">Lista de participantes de nuestra promoción, “En esta navidad, reviví momentos, plaza miraflores”</Typography>
 
-      <TextField
-        variant="outlined"
-        margin="normal"
-        fullWidth
-        placeholder="Buscar..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <Search />
-            </InputAdornment>
-          )
-        }}
-      />
+      
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+        <TextField
+          variant="outlined"
+          margin="normal"
+          fullWidth
+          placeholder="Buscar..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search />
+              </ InputAdornment>
+            )
+          }}
+        />
+        <Button
+          style={{ width: '30%' }}
+          variant="contained"
+          onClick={pickWinner}
+          sx={{
+            marginLeft:2
+          }}
+        >
+          Generar Ganador
+        </Button>
+      </Box>
 
       <TableContainer component={Paper}>
         <Table>
@@ -129,6 +190,7 @@ function EntriesList() {
               <TableCell>Celular</TableCell>
               <TableCell>Valor de Compra</TableCell>
               <TableCell>Imagen de Factura</TableCell>
+              <TableCell>Administrar</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -141,7 +203,10 @@ function EntriesList() {
                 <TableCell style={{ whiteSpace: 'nowrap' }}>{entry.celular}</TableCell>
                 <TableCell style={{ whiteSpace: 'nowrap' }}>{formatLempiras(entry.valorCompra)}</TableCell>
                 <TableCell>
-                  <button onClick={() => openFacturaImage(entry.id)}>Ver Imagen</button>
+                  <Button onClick={() => openFacturaImage(entry.id)}>Ver Imagen</Button>
+                </TableCell>
+                <TableCell>
+                  <Button onClick={() => modalBorrarRegistro(entry.id)}>Borrar</Button>
                 </TableCell>
               </TableRow>
             ))}
@@ -183,6 +248,83 @@ function EntriesList() {
         </div>
     </div>
 </Modal>
+
+  <Modal
+    open={isModalBorrarOpen}
+    onClose={() => setIsModalBorrarOpen(false)}
+    aria-labelledby="modal-title"
+    aria-describedby="modal-description"
+  >
+    <Box 
+        sx={{ 
+            position: 'absolute', 
+            top: '50%', left: '50%', 
+            transform: 'translate(-50%, -50%)', 
+            width: 400, bgcolor: 'background.paper', 
+            boxShadow: 24, p: 4, 
+            display: 'flex', flexDirection: 'column', alignItems: 'center'
+        }}
+    >
+        <Typography id="modal-title" variant="h6" component="h2">
+            ¿Está seguro que desea eliminar el registro?
+        </Typography>
+        <Box 
+            sx={{ 
+                mt: 2, 
+                display: 'flex', 
+                justifyContent: 'space-around', 
+                width: '100%' 
+            }}
+        >
+            <Button 
+                variant="outlined" 
+                color="primary" 
+                onClick={borrarRegistro}
+            >
+                Sí
+            </Button>
+            <Button 
+                variant="outlined" 
+                color="secondary" 
+                onClick={() => setIsModalBorrarOpen(false)}
+            >
+                No
+            </Button>
+        </Box>
+    </Box>
+  </Modal>
+      <Modal
+        open={isWinnerModalOpen}
+        onClose={() => setIsWinnerModalOpen(false)}
+        aria-labelledby="winner-modal-title"
+        aria-describedby="winner-modal-description"
+      >
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%', left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 600, bgcolor: 'background.paper',
+            boxShadow: 24, p: 4,
+            display: 'flex', flexDirection: 'column', alignItems: 'center'
+          }}
+        >
+          <Typography id="winner-modal-title" variant="h6" component="h2">
+            El Ganador Es:
+          </Typography>
+          {winner && (
+            <Box sx={{ mt: 2, textAlign: 'left' }}>
+              <Typography>Numero: {winner.id}</Typography>
+              <Typography>Nombre: {winner.nombre}</Typography>
+              <Typography>Identidad: {winner.dni}</Typography>
+              <Typography>Celular: {winner.celular}</Typography>
+              <Typography>Tienda: {winner.tienda}</Typography>
+              <Typography>Factura: <Button onClick={() => openFacturaImage(winner.id)}>Ver Imagen</Button></Typography>
+            </Box>
+          )}
+          <Button sx={{ mt: 2 }} onClick={() => setIsWinnerModalOpen(false)}>Cerrar</Button>
+        </Box>
+      </Modal>
     </div>
   );
 }

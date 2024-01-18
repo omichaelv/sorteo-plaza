@@ -60,6 +60,13 @@ function FormComponent() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const currentDate = new Date();
+    const deadlineDate = new Date('2024-01-07');
+    if (currentDate >= deadlineDate) {
+      alert("La fecha límite de participación era el 6 de Enero de 2024, muchas gracias por querer participar.");
+      return; 
+    }
+
     if (validate()) {
       try {
         const response = await createFormData(formData);
