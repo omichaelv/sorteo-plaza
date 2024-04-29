@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import config from '../config';
-import logoNavidad from '../images/logo-navidad.jpg';
+import logoNavidad from '../images/logo.png';
 import authService from '../services/authService'; 
 import { darken } from '@mui/system';
 import {
@@ -45,6 +45,7 @@ function LoginForm() {
           fullWidth
           label="Usuario"
           autoFocus
+          sx={{ backgroundColor: '#f5f5f5' }}
           onChange={e => setCredentials({ ...credentials, username: e.target.value })}
         />
         <TextField
@@ -54,6 +55,7 @@ function LoginForm() {
           fullWidth
           label="Contraseña"
           type="password"
+          sx={{ backgroundColor: '#f5f5f5' }}
           onChange={e => setCredentials({ ...credentials, password: e.target.value })}
         />
         <Button

@@ -6,8 +6,9 @@ import {
   Paper, Typography, TablePagination, TextField, InputAdornment, Modal,Button, Box
 } from '@mui/material';
 import { Search } from '@mui/icons-material';
-import logoNavidad from '../images/logo-navidad.jpg';
+import logoNavidad from '../images/logo.png';
 import PanZoom from 'react-easy-panzoom';
+import Confetti from 'react-confetti';
 
 function EntriesList() {
   // Call our custom authentication hook
@@ -18,6 +19,7 @@ function EntriesList() {
   const [filteredEntries, setFilteredEntries] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(25);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
     // Fetch the data
@@ -143,12 +145,16 @@ function EntriesList() {
     const randomIndex = Math.floor(Math.random() * entries.length);
     setWinner(entries[randomIndex]);
     setIsWinnerModalOpen(true);
+    setShowConfetti(true);
+
+    setTimeout(() => setShowConfetti(false), 5000);
   };
 
   return (
     <div>
       <img src={logoNavidad} alt="Navidad Logo" style={{ width: '30%',height:'40%', marginBottom: '16px' }} /> 
       <Typography variant="h5">Lista de participantes de nuestra promoción, “En esta navidad, reviví momentos, plaza miraflores”</Typography>
+      {showConfetti && <Confetti width={window.innerWidth} height={window.innerHeight} />}
 
       
       <Box sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
@@ -158,6 +164,7 @@ function EntriesList() {
           fullWidth
           placeholder="Buscar..."
           value={searchTerm}
+          sx={{ backgroundColor: '#f5f5f5' }}
           onChange={(e) => setSearchTerm(e.target.value)}
           InputProps={{
             startAdornment: (
@@ -293,38 +300,35 @@ function EntriesList() {
         </Box>
     </Box>
   </Modal>
-      <Modal
-        open={isWinnerModalOpen}
-        onClose={() => setIsWinnerModalOpen(false)}
-        aria-labelledby="winner-modal-title"
-        aria-describedby="winner-modal-description"
-      >
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '50%', left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: 600, bgcolor: 'background.paper',
-            boxShadow: 24, p: 4,
-            display: 'flex', flexDirection: 'column', alignItems: 'center'
-          }}
-        >
-          <Typography id="winner-modal-title" variant="h6" component="h2">
-            El Ganador Es:
-          </Typography>
-          {winner && (
-            <Box sx={{ mt: 2, textAlign: 'left' }}>
-              <Typography>Numero: {winner.id}</Typography>
-              <Typography>Nombre: {winner.nombre}</Typography>
-              <Typography>Identidad: {winner.dni}</Typography>
-              <Typography>Celular: {winner.celular}</Typography>
-              <Typography>Tienda: {winner.tienda}</Typography>
-              <Typography>Factura: <Button onClick={() => openFacturaImage(winner.id)}>Ver Imagen</Button></Typography>
-            </Box>
-          )}
-          <Button sx={{ mt: 2 }} onClick={() => setIsWinnerModalOpen(false)}>Cerrar</Button>
-        </Box>
-      </Modal>
+  <Modal
+  open={isWinnerModalOpen}
+  onClose={() => { setIsWinnerModalOpen(false); setShowConfetti(false); }}
+  aria-labelledby="winner-modal-title"
+  aria-describedby="winner-modal-description"
+>
+  <Box
+    sx={{
+      position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+      width: 600, bgcolor: 'background.paper', boxShadow: 24, p: 4,
+      display: 'flex', flexDirection: 'column', alignItems: 'center'
+    }}
+  >
+    <Typography id="winner-modal-title" variant="h6" component="h2">
+      El Ganador Es:
+    </Typography>
+    {winner && (
+      <Box sx={{ mt: 2, textAlign: 'center' }}>
+        <Typography>Numero: {winner.id}</Typography>
+        <Typography>Nombre: {winner.nombre}</Typography>
+        <Typography>Identidad: {winner.dni}</Typography>
+        <Typography>Celular: {winner.celular}</Typography>
+        <Typography>Tienda: {winner.tienda}</Typography>
+        <Typography>Factura: <Button onClick={() => openFacturaImage(winner.id)}>Ver Imagen</Button></Typography>
+      </Box>
+    )}
+    <Button sx={{ mt: 2 }} onClick={() => { setIsWinnerModalOpen(false); setShowConfetti(false); }}>Cerrar</Button>
+  </Box>
+</Modal>
     </div>
   );
 }

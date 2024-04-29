@@ -1,13 +1,16 @@
-const ENV = process.env.NODE_ENV || 'development';
+const ENV = 'production';
 
 const config = {
-    development: {
-        apiBaseUrl: 'http://localhost:5000'
-    },
+    
     production: {
-        apiBaseUrl: '/api'
+        apiBaseUrl: '/api',
+        jwtSecret: process.env.JWT_SECRET || '+FMyR"nnJ1uK:{7'
     },
     // ... You can add more environments if needed
+    /*development: {
+        apiBaseUrl: 'http://localhost:5000',
+        jwtSecret: '+FMyR"nnJ1uK:{7'  // Use a different secret for development
+    },  */
 };
 
 export default config[ENV];

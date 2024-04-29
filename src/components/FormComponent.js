@@ -3,7 +3,7 @@ import { TextField, Button, Container, Typography, InputAdornment, IconButton, A
 import { PhotoCamera } from "@mui/icons-material";
 import HeaderComponent from './HeaderComponent';
 import { darken } from '@mui/system';
-import logoNavidad from '../images/logo-navidad.jpg';
+import logoNavidad from '../images/logo.png';
 
 import { createFormData } from '../services/formDataService';
 import tiendas from './storeList'; 
@@ -27,12 +27,12 @@ function FormComponent() {
 
   const sortedTiendas = tiendas.sort((a, b) => a.localeCompare(b));
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [errors, setErrors] = useState({});
   const validate = () => {
     let tempErrors = {};
 
-    // You can add more specific validation rules here
     tempErrors.nombre = formData.nombre ? "" : "El nombre es obligatorio.";
     tempErrors.dni = formData.dni ? "" : "El DNI es obligatorio.";
     tempErrors.tienda = formData.tienda ? "" : "La tienda es obligatoria.";
@@ -60,18 +60,23 @@ function FormComponent() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const currentDate = new Date();
-    const deadlineDate = new Date('2024-01-07');
-    if (currentDate >= deadlineDate) {
-      alert("La fecha límite de participación era el 6 de Enero de 2024, muchas gracias por querer participar.");
-      return; 
+    if (isSubmitting) {
+      return;
     }
-
+    setIsSubmitting(true);
+  
+    const currentDate = new Date();
+    const deadlineDate = new Date('2024-05-31');
+    if (currentDate >= deadlineDate) {
+      alert("La fecha límite de participación era el 31 de Mayo de 2024, muchas gracias por querer participar.");
+      setIsSubmitting(false);
+      return;
+    }
+  
     if (validate()) {
       try {
         const response = await createFormData(formData);
-
-        if (response && response.id) { 
+        if (response && response.id) {
           setFormData(initialFormData);
           setFormSubmitted(true);
         } else {
@@ -81,8 +86,7 @@ function FormComponent() {
         alert("Error al enviar el formulario. Por favor intente nuevamente más tarde.");
       }
     }
-
-   
+    setIsSubmitting(false);
   };
 
   const handleInputChange = (e) => {
@@ -270,6 +274,7 @@ function FormComponent() {
           fullWidth
           variant="contained"
           color="primary"
+          disabled={isSubmitting} 
           className="button"
           sx={{ backgroundColor: '#e16c08', '&:hover': { backgroundColor: darken('#e16c08', 0.1) } }}
           style={{ marginTop: "16px", width:"80%" }}

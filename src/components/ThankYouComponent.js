@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, Typography, Container } from '@mui/material';
 import { darken } from '@mui/system';
 import { Box } from '@mui/material';
-import logoNavidad from '../images/logo-navidad.jpg';
+import logoNavidad from '../images/logo.png';
 
 function ThankYouComponent({ returnToForm }) {
   return (
